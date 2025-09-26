@@ -1,0 +1,99 @@
+import React from 'react'
+import { motion } from 'framer-motion'
+import { GraduationCap, Moon, Sun, User, LogOut, Settings, Bell } from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
+import { useTheme } from '../../contexts/ThemeContext'
+import { Button } from '../ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+
+interface NavbarProps {
+  onViewChange: (view: string) => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ onViewChange }) => {
+  const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
+
+  return (
+    <motion.nav 
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    >
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
+          <motion.div 
+            className="flex items-center space-x-2"
+            whileHover={{ scale: 1.05 }}
+          >
+            <GraduationCap className="h-8 w-8 text-primary" />
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              CampusConnect
+            </span>
+          </motion.div>
+
+          {/* Right side */}
+          <div className="flex items-center space-x-4">
+            {/* Theme toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="relative"
+            >
+              <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+
+            {/* Notifications */}
+            <Button variant="ghost" size="icon">
+              <Bell className="h-4 w-4" />
+              <span className="sr-only">Notifications</span>
+            </Button>
+
+            {/* User menu */}
+            {user && (
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.avatar} alt={user.name} />
+                      <AvatarFallback>{user.name ? user.name.split(' ').map(n => n[0]).join('') : user.email ? user.email.substring(0, 2).toUpperCase() : 'U'}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content className="w-56 bg-background border rounded-lg shadow-lg p-1" align="end">
+                  <DropdownMenu.Label className="px-2 py-1.5 text-sm font-semibold">
+                    {user.name}
+                  </DropdownMenu.Label>
+                  <DropdownMenu.Separator className="h-px bg-border my-1" />
+                  <DropdownMenu.Item 
+                    onClick={() => onViewChange('profile')}
+                    className="flex items-center px-2 py-2 text-sm rounded hover:bg-accent cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item className="flex items-center px-2 py-2 text-sm rounded hover:bg-accent cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Separator className="h-px bg-border my-1" />
+                  <DropdownMenu.Item 
+                    className="flex items-center px-2 py-2 text-sm rounded hover:bg-accent cursor-pointer text-destructive"
+                    onClick={logout}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Root>
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.nav>
+  )
+}

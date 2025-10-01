@@ -69,7 +69,7 @@ const AppContent: React.FC = () => {
           isMobileSidebarOpen={isMobileSidebarOpen}
           onCloseMobileSidebar={() => setMobileSidebarOpen(false)}
         />
-        <main className="flex-1 p-8 md:ml-64">
+        <main className={`flex-1 p-8 ${isMobileSidebarOpen ? 'ml-64' : ''} md:ml-64`}>
           <motion.div
             key={currentView}
             initial={{ opacity: 0, y: 20 }}

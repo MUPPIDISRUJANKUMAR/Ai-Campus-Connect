@@ -109,7 +109,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, isM
             exit="closed"
             variants={sidebarVariants}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed left-0 top-0 z-40 h-full w-64 border-r bg-card md:top-16 md:h-[calc(100vh-4rem)] md:translate-x-0"
+            className="fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] w-64 border-r bg-card md:translate-x-0"
           >
             <div className="flex h-full flex-col">
               <div className="flex-1 overflow-y-auto py-6">

@@ -68,7 +68,7 @@ export function EditProfileForm() {
             name="bio"
             value={formData.bio}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded dark:bg-gray-800"
           />
         </div>
         <div>
@@ -160,7 +160,7 @@ export function EditProfileForm() {
             name="availability"
             value={formData.availability}
             onChange={handleInputChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded dark:bg-gray-800"
           >
             <option value="open">Open</option>
             <option value="limited">Limited</option>

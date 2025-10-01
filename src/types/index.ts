@@ -18,6 +18,7 @@ export interface User {
   bio?: string
   availability?: 'open' | 'limited' | 'closed'
   location?: string
+  theme?: 'light' | 'dark'
 }
 
 export interface MentorshipRequest {
@@ -75,7 +76,7 @@ export interface Event {
   description: string
   datetime: string
   location: string
-  type: 'networking' | 'workshop' | 'career_fair' | 'social'
+  type: 'networking' | 'workshop' | 'career_fair' | 'social'|
   maxAttendees?: number
   registeredCount: number
   createdBy: string

@@ -11,10 +11,12 @@ import { ChatInterface } from './components/chat/ChatInterface'
 import { AlumniDiscovery } from './components/discover/AlumniDiscovery'
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { ProfilePage } from './components/profile/ProfilePage';
+import Settings from './components/settings/Settings';
 
 const AppContent: React.FC = () => {
   const { user, isAuthenticated } = useAuth()
   const [currentView, setCurrentView] = useState('dashboard')
+  const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
 
   if (!isAuthenticated) {
@@ -43,6 +45,8 @@ const AppContent: React.FC = () => {
         return <ChatInterface title="AI Career Assistant" type="faq" />
        case 'profile':
         return <ProfilePage />
+      case 'settings':
+        return <Settings />
       case 'verification':
       case 'analytics':
       case 'moderation':
@@ -54,10 +58,18 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar onViewChange={setCurrentView} />
+      <Navbar 
+        onViewChange={setCurrentView} 
+        onToggleMobileSidebar={() => setMobileSidebarOpen(!isMobileSidebarOpen)} 
+      />
       <div className="flex">
-        <Sidebar currentView={currentView} onViewChange={setCurrentView} />
-        <main className="flex-1 ml-64 p-8">
+        <Sidebar 
+          currentView={currentView} 
+          onViewChange={setCurrentView} 
+          isMobileSidebarOpen={isMobileSidebarOpen}
+          onCloseMobileSidebar={() => setMobileSidebarOpen(false)}
+        />
+        <main className="flex-1 p-8 md:ml-64">
           <motion.div
             key={currentView}
             initial={{ opacity: 0, y: 20 }}
@@ -75,11 +87,11 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <ThemeProvider>
         <AppContent />
-      </AuthProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </AuthProvider>
   )
 }
 

@@ -1,4 +1,3 @@
-// src/contexts/AuthContext.tsx
 import React, {
   createContext,
   useContext,
@@ -6,7 +5,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { User as AppUser, UserRole } from "../types"; // keep your types
+import { User as AppUser, UserRole } from "../types";
 import { auth, db } from "../lib/firebase";
 import {
   createUserWithEmailAndPassword,
@@ -22,8 +21,9 @@ import {
   getDoc,
   updateDoc,
   serverTimestamp,
-  DocumentData,
 } from "firebase/firestore";
+
+type Theme = "light" | "dark";
 
 interface AuthContextType {
   user: AppUser | null;
@@ -36,13 +36,12 @@ interface AuthContextType {
   switchRole: (role: UserRole) => Promise<void>;
   updateUserProfile: (data: Partial<AppUser>) => Promise<void>;
   isAuthenticated: boolean;
+  theme: Theme;
+  toggleTheme: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * Helper: fetch user profile from Firestore
- */
 const fetchUserProfile = async (uid: string): Promise<AppUser | null> => {
   const ref = doc(db, "users", uid);
   const snap = await getDoc(ref);
@@ -50,13 +49,11 @@ const fetchUserProfile = async (uid: string): Promise<AppUser | null> => {
   return snap.data() as AppUser;
 };
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [theme, setTheme] = useState<Theme>("light");
 
-  // Listen to Firebase auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(
       auth,
@@ -65,8 +62,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           if (fbUser) {
             const profile = await fetchUserProfile(fbUser.uid);
             setUser(profile);
+            if (profile?.theme) {
+              setTheme(profile.theme);
+            } else {
+              const savedTheme = localStorage.getItem("theme") as Theme;
+              if (savedTheme) {
+                setTheme(savedTheme);
+              } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                setTheme("dark");
+              }
+            }
           } else {
             setUser(null);
+            const savedTheme = localStorage.getItem("theme") as Theme;
+            if (savedTheme) {
+              setTheme(savedTheme);
+            }
           }
         } catch (err) {
           console.error("Auth listener error:", err);
@@ -80,7 +91,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     return () => unsubscribe();
   }, []);
 
-  // register: create user in Firebase Auth and create profile doc in Firestore
+  useEffect(() => {
+    document.documentElement.className = theme;
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = async () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    if (user) {
+      try {
+        const userRef = doc(db, "users", user.id);
+        await updateDoc(userRef, { theme: newTheme });
+      } catch (error) {
+        console.error("Failed to update theme in Firestore:", error);
+      }
+    }
+  };
+
   const register = async (
     userData: Partial<AppUser> & { email: string; password: string }
   ) => {
@@ -88,12 +116,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     const uid = cred.user.uid;
 
-    // update display name in Firebase Auth
     if (name) {
       try {
         await updateProfile(cred.user, { displayName: name });
       } catch (err) {
-        console.warn("updateProfile failed", err); // non-fatal
+        console.warn("updateProfile failed", err);
       }
     }
 
@@ -105,6 +132,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       verified: cred.user.emailVerified,
       skills: [],
       interests: [],
+      theme: theme, // Set default theme on registration
       ...rest,
     };
 
@@ -113,15 +141,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       createdAt: serverTimestamp(),
     });
 
-    // onAuthStateChanged will handle setting the user state
-    // but we can optimistically set it here for faster UI updates
     setUser(profile);
   };
 
-  // login: sign in with email + password
   const login = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
-    // onAuthStateChanged handler will set user after sign in
   };
 
   const logout = async () => {
@@ -143,7 +167,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setUser({ ...user, ...data });
   };
 
-
   return (
     <AuthContext.Provider
       value={{
@@ -155,6 +178,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         switchRole,
         updateUserProfile,
         isAuthenticated: !!user,
+        theme,
+        toggleTheme,
       }}
     >
       {loading ? null : children}
@@ -169,3 +194,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

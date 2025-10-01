@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { GraduationCap, Moon, Sun, User, LogOut, Settings, Bell } from 'lucide-react'
+import { GraduationCap, Moon, Sun, User, LogOut, Settings, Bell, Menu } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { Button } from '../ui/button'
@@ -9,9 +9,10 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 
 interface NavbarProps {
   onViewChange: (view: string) => void;
+  onToggleMobileSidebar: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onViewChange }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onViewChange, onToggleMobileSidebar }) => {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
 
@@ -24,15 +25,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onViewChange }) => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <motion.div 
-            className="flex items-center space-x-2"
-            whileHover={{ scale: 1.05 }}
-          >
-            <GraduationCap className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-              CampusConnect
-            </span>
-          </motion.div>
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="icon" onClick={onToggleMobileSidebar} className="md:hidden">
+              <Menu className="h-6 w-6" />
+            </Button>
+            <motion.div 
+              className="flex items-center space-x-2"
+              whileHover={{ scale: 1.05 }}
+            >
+              <GraduationCap className="h-8 w-8 text-primary" />
+              <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                CampusConnect
+              </span>
+            </motion.div>
+          </div>
 
           {/* Right side */}
           <div className="flex items-center space-x-4">
@@ -76,7 +82,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onViewChange }) => {
                     <User className="mr-2 h-4 w-4" />
                     Profile
                   </DropdownMenu.Item>
-                  <DropdownMenu.Item className="flex items-center px-2 py-2 text-sm rounded hover:bg-accent cursor-pointer">
+                  <DropdownMenu.Item 
+                    onClick={() => onViewChange('settings')}
+                    className="flex items-center px-2 py-2 text-sm rounded hover:bg-accent cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </DropdownMenu.Item>

@@ -1,12 +1,18 @@
-import { useState, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../../contexts/ToastContext"; // Import the new useToast hook
 
-export function EditProfileForm() {
+export function EditProfileForm({
+  onSaveSuccess,
+}: {
+  onSaveSuccess: () => void;
+}) {
   const { user, loading: authLoading, updateUserProfile } = useAuth();
+  const { showToast } = useToast(); // Use the showToast function from the context
   const [formLoading, setFormLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -23,7 +29,29 @@ export function EditProfileForm() {
     availability: user?.availability || "open",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        bio: user.bio || "",
+        skills: user.skills?.join(", ") || "",
+        interests: user.interests?.join(", ") || "",
+        goals: user.goals?.join(", ") || "",
+        industry: user.industry || "",
+        company: user.company || "",
+        position: user.position || "",
+        graduationYear: user.graduationYear || "",
+        major: user.major || "",
+        location: user.location || "",
+        availability: user.availability || "open",
+      });
+    }
+  }, [user]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -42,10 +70,14 @@ export function EditProfileForm() {
 
     try {
       await updateUserProfile(processedData);
-      // Optionally, show a success message
+      showToast("Your changes have been saved!", "success", 8000); // Use the global showToast
+      console.log("EditProfileForm: Profile saved successfully.");
+      onSaveSuccess(); // Call onSaveSuccess immediately
+      console.log("EditProfileForm: onSaveSuccess called.");
     } catch (error) {
       console.error("Failed to update profile:", error);
-      // Optionally, show an error message
+      showToast("Failed to save changes.", "error", 20000); // Use the global showToast
+      console.log("EditProfileForm: Profile save failed.");
     } finally {
       setFormLoading(false);
     }

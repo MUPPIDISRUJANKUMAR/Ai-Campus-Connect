@@ -12,6 +12,7 @@ import { AlumniDiscovery } from './components/discover/AlumniDiscovery'
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { ProfilePage } from './components/profile/ProfilePage';
 import Settings from './components/settings/Settings';
+import { ToastProvider } from './contexts/ToastContext'; // Import ToastProvider
 
 const AppContent: React.FC = () => {
   const { user, isAuthenticated } = useAuth()
@@ -87,11 +88,13 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <AppContent />
-      </ThemeProvider>
-    </AuthProvider>
+    <ToastProvider> {/* Wrap with ToastProvider */}
+      <AuthProvider>
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
+      </AuthProvider>
+    </ToastProvider>
   )
 }
 

@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Lock, User, GraduationCap } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  User,
+  GraduationCap,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+} from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { UserRole } from "../../types";
 import { Button } from "../ui/button";
@@ -15,6 +23,7 @@ import {
 } from "../ui/card";
 import * as Select from "@radix-ui/react-select";
 import { ChevronDown } from "lucide-react";
+import { useToast } from "../../contexts/ToastContext";
 
 interface RegisterFormProps {
   onToggleMode: () => void;
@@ -30,30 +39,81 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { register } = useAuth();
+  const [showVerificationBanner, setShowVerificationBanner] = useState(false);
+  const {
+    register,
+    user: authUser,
+    sendEmailVerification: sendVerificationEmailAuth,
+  } = useAuth(); // Get sendEmailVerification from useAuth
+  const { showToast } = useToast();
+
+  const handleResendVerification = async () => {
+    if (authUser) {
+      try {
+        await sendVerificationEmailAuth(authUser);
+        showToast(
+          "Verification email re-sent! Please check your inbox.",
+          "info"
+        );
+      } catch (err) {
+        console.error("Error re-sending verification email:", err);
+        showToast("Failed to re-send verification email.", "error");
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setShowVerificationBanner(false); // Hide banner on new submission attempt
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
+      showToast("Passwords do not match", "error");
       setLoading(false);
       return;
     }
 
+        // College-specific email validation
+
+        if (!formData.email.endsWith("@sru.edu.in")) {
+
+          setError("Enter College specific mail (e.g., yourname@sru.edu.in)");
+
+          showToast("Enter College specific mail (e.g., yourname@sru.edu.in)", "error");
+
+          setLoading(false);
+
+          return;
+
+        }
+
     try {
-      await register(formData);
-    } catch (err: any) {
-      if (err.code === "auth/email-already-in-use") {
-        setError("An account with this email already exists.");
-      } else if (err.code === "auth/weak-password") {
-        setError("The password is too weak. Please use at least 6 characters.");
+      const firebaseUser = await register(formData); // register now returns the FirebaseUser
+      if (firebaseUser && !firebaseUser.emailVerified) {
+        setShowVerificationBanner(true);
+        showToast(
+          "Registration Successful! Please verify your email.",
+          "success"
+        );
       } else {
-        setError("An unexpected error occurred. Please try again later.");
+        showToast("Registration Successful!", "success");
+        // Redirect to dashboard if already verified (shouldn't happen on first register)
       }
-      console.error("Registration error:", err);
+    } catch (err: any) {
+      let errorMessage =
+        "An unexpected error occurred. Please try again later.";
+      if (err.code === "auth/email-already-in-use") {
+        errorMessage = "An account with this email already exists.";
+      } else if (err.code === "auth/weak-password") {
+        errorMessage =
+          "The password is too weak. Please use at least 6 characters.";
+      } else {
+        console.error("Registration error:", err);
+      }
+      setError(errorMessage);
+      showToast(errorMessage, "error");
     } finally {
       setLoading(false);
     }
@@ -78,10 +138,37 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
-                {error}
-              </div>
+            {showVerificationBanner && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md shadow-md flex items-center justify-between"
+                role="alert"
+              >
+                <div className="flex items-center">
+                  <AlertTriangle className="h-5 w-5 mr-3" />
+                  <p className="font-bold">Verify Your Email</p>
+                  <p className="text-sm ml-2">
+                    Please check your inbox for a verification link.
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResendVerification}
+                  className="text-yellow-700 hover:bg-yellow-200"
+                >
+                  Resend
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowVerificationBanner(false)}
+                  className="text-yellow-700 hover:bg-yellow-200"
+                >
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </motion.div>
             )}
 
             <div className="space-y-2">

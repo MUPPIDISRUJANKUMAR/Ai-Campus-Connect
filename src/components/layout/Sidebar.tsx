@@ -50,8 +50,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, isM
       case 'student':
         roleSpecificItems = [
           { id: 'discover', label: 'Find Alumni', icon: Users },
-          { id: 'requests', label: 'My Requests', icon: UserCheck },
-          { id: 'jobs', label: 'Job Board', icon: Briefcase },
+          { id: 'myrequests', label: 'My Requests', icon: UserCheck },
+          { id: 'jobboard', label: 'Job Board', icon: Briefcase },
           { id: 'events', label: 'Events', icon: Calendar },
           { id: 'faq', label: 'Ask AI', icon: HelpCircle },
         ]
@@ -59,8 +59,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange, isM
       case 'alumni':
         roleSpecificItems = [
           { id: 'students', label: 'Students', icon: Users },
-          { id: 'requests', label: 'Requests', icon: UserCheck },
-          { id: 'jobs', label: 'My Postings', icon: Briefcase },
+          { id: 'myrequests', label: 'Requests', icon: UserCheck },
+          { id: 'jobboard', label: 'My Postings', icon: Briefcase },
           { id: 'events', label: 'Events', icon: Calendar },
         ]
         break;

@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, GraduationCap } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  GraduationCap,
+  AlertTriangle,
+  XCircle,
+} from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -12,6 +20,7 @@ import {
   CardContent,
   CardFooter,
 } from "../ui/card";
+import { useToast } from "../../contexts/ToastContext";
 
 interface LoginFormProps {
   onToggleMode: () => void;
@@ -23,25 +32,58 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { login } = useAuth();
+  const [showVerificationBanner, setShowVerificationBanner] = useState(false);
+  const {
+    login,
+    firebaseUser,
+    sendEmailVerification: sendVerificationEmailAuth,
+  } = useAuth();
+  const { showToast } = useToast();
+
+  const handleResendVerification = async () => {
+    if (firebaseUser) {
+      try {
+        await sendVerificationEmailAuth(firebaseUser);
+        showToast(
+          "Verification email re-sent! Please check your inbox.",
+          "info"
+        );
+      } catch (err) {
+        console.error("Error re-sending verification email:", err);
+        showToast("Failed to re-send verification email.", "error");
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setShowVerificationBanner(false); // Hide banner on new submission attempt
 
     try {
       await login(email, password);
+      // If login is successful and email is verified, AuthContext will handle redirection
     } catch (err: any) {
-      if (
+      if (err.message === "Email not verified. Please check your inbox.") {
+        setError(err.message);
+        setShowVerificationBanner(true);
+        showToast(err.message, "error");
+      } else if (
         err.code === "auth/user-not-found" ||
-        err.code === "auth/wrong-password"
+        err.code === "auth/wrong-password" ||
+        err.code === "auth/invalid-credential" // Added for more generic login errors
       ) {
         setError("Invalid email or password. Please try again.");
+        showToast("Invalid email or password. Please try again.", "error");
       } else {
         setError("An unexpected error occurred. Please try again later.");
+        showToast(
+          "An unexpected error occurred. Please try again later.",
+          "error"
+        );
+        console.error("Login error:", err);
       }
-      console.error("Login error:", err);
     } finally {
       setLoading(false);
     }
@@ -49,8 +91,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
 
   const demoLogins = [
     {
-      email: "alex.chen@university.edu",
-      password: "studentpass",
+      email: "2203a51249@sru.edu.in",
+      password: "123456",
       role: "Student",
     },
     {
@@ -80,10 +122,37 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
-                {error}
-              </div>
+            {showVerificationBanner && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md shadow-md flex items-center justify-between"
+                role="alert"
+              >
+                <div className="flex items-center">
+                  <AlertTriangle className="h-5 w-5 mr-3" />
+                  <p className="font-bold">Verify Your Email</p>
+                  <p className="text-sm ml-2">
+                    Please check your inbox for a verification link.
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResendVerification}
+                  className="text-yellow-700 hover:bg-yellow-200"
+                >
+                  Resend
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowVerificationBanner(false)}
+                  className="text-yellow-700 hover:bg-yellow-200"
+                >
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </motion.div>
             )}
 
             <div className="space-y-2">

@@ -12,15 +12,19 @@ import { AlumniDiscovery } from './components/discover/AlumniDiscovery'
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { ProfilePage } from './components/profile/ProfilePage';
 import Settings from './components/settings/Settings';
+import MyRequestsPage from './components/myrequests/MyRequestsPage';
+import JobBoardPage from './components/jobboard/JobBoardPage';
+import EventsPage from './components/events/EventsPage';
 import { ToastProvider } from './contexts/ToastContext'; // Import ToastProvider
 
 const AppContent: React.FC = () => {
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, firebaseUser } = useAuth()
   const [currentView, setCurrentView] = useState('dashboard')
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
 
-  if (!isAuthenticated) {
+  // If not authenticated OR authenticated but email not verified, show auth forms
+  if (!isAuthenticated || (firebaseUser && !firebaseUser.emailVerified)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-blue-50/50 to-purple-50/50 dark:from-primary/5 dark:via-blue-950/20 dark:to-purple-950/20 flex items-center justify-center p-4">
         <AnimatePresence mode="wait">
@@ -48,6 +52,12 @@ const AppContent: React.FC = () => {
         return <ProfilePage />
       case 'settings':
         return <Settings />
+      case 'myrequests':
+        return <MyRequestsPage />
+      case 'jobboard':
+        return <JobBoardPage />
+      case 'events':
+        return <EventsPage />
       case 'verification':
       case 'analytics':
       case 'moderation':

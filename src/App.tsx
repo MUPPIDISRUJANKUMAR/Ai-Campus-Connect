@@ -95,6 +95,7 @@ const AppContent: React.FC<{ currentView: string; onViewChange: (view: string) =
             {renderContent()}
           </motion.div>
         </main>
+        {isAuthenticated && <Notifications onViewChange={onViewChange} />}
       </div>
     </div>
   )
@@ -109,7 +110,6 @@ function App() {
         <ThemeProvider>
           <NotificationProvider>
             <AppContent currentView={currentView} onViewChange={setCurrentView} />
-            <Notifications onViewChange={setCurrentView} />
           </NotificationProvider>
         </ThemeProvider>
       </AuthProvider>

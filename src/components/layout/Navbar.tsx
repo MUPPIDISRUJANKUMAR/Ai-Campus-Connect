@@ -3,9 +3,11 @@ import { motion } from 'framer-motion'
 import { GraduationCap, Moon, Sun, User, LogOut, Settings, Bell, Menu } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useNotifications } from '../../contexts/NotificationContext'
 import { Button } from '../ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { NotificationPanel } from '../notifications/NotificationPanel'
 
 interface NavbarProps {
   onViewChange: (view: string) => void;
@@ -15,6 +17,7 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onViewChange, onToggleMobileSidebar }) => {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { unreadCount } = useNotifications()
 
   return (
     <motion.nav 
@@ -55,10 +58,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onViewChange, onToggleMobileSide
             </Button>
 
             {/* Notifications */}
-            <Button variant="ghost" size="icon">
-              <Bell className="h-4 w-4" />
-              <span className="sr-only">Notifications</span>
-            </Button>
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    </span>
+                  )}
+                  <Bell className="h-4 w-4" />
+                  <span className="sr-only">Notifications</span>
+                </Button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content className="w-80 bg-background border rounded-lg shadow-lg p-1" align="end">
+                <NotificationPanel onViewChange={onViewChange} />
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
 
             {/* User menu */}
             {user && (

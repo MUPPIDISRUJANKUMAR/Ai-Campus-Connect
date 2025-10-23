@@ -1,25 +1,22 @@
 export type UserRole = 'student' | 'alumni' | 'admin'
 
 export interface User {
-  id: string
-  name: string
-  email: string
-  role: UserRole
-  avatar?: string
-  verified: boolean
-  skills: string[]
-  interests: string[]
-  goals?: string[]
-  industry?: string
-  company?: string
-  position?: string
-  graduationYear?: number
-  major?: string
-  bio?: string
-  availability?: 'open' | 'limited' | 'closed'
-  location?: string
-  theme?: 'light' | 'dark'
+  id: string;
+  email: string;
+  name: string;
+  avatar: string;
+  role: 'student' | 'alumni' | 'admin';
 }
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  link: string;
+  read: boolean;
+  timestamp: string;
+}
+
 
 export interface MentorshipRequest {
   id: string

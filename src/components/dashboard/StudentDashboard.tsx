@@ -1,44 +1,81 @@
-import React from 'react'
-import { motion } from 'framer-motion'
-import { Users, MessageSquare, Briefcase, Calendar, TrendingUp, Clock } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent } from '../ui/card'
-import { Badge } from '../ui/badge'
-import { Button } from '../ui/button'
-import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar'
+import React from "react";
+import { motion } from "framer-motion";
+import {
+  Users,
+  MessageSquare,
+  Briefcase,
+  Calendar,
+  TrendingUp,
+  Clock,
+} from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 
-export const StudentDashboard: React.FC = () => {
+interface StudentDashboardProps {
+  onViewChange: (view: string) => void;
+}
+
+export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onViewChange }) => {
   const stats = [
-    { label: 'Active Connections', value: '12', icon: Users, trend: '+2' },
-    { label: 'Messages', value: '28', icon: MessageSquare, trend: '+5' },
-    { label: 'Job Applications', value: '7', icon: Briefcase, trend: '+1' },
-    { label: 'Upcoming Events', value: '3', icon: Calendar, trend: '0' }
-  ]
+    { label: "Active Connections", value: "12", icon: Users, trend: "+2" },
+    { label: "Messages", value: "28", icon: MessageSquare, trend: "+5" },
+    { label: "Job Applications", value: "7", icon: Briefcase, trend: "+1" },
+    { label: "Upcoming Events", value: "3", icon: Calendar, trend: "0" },
+  ];
 
   const recentActivity = [
-    { type: 'message', text: 'New message from Sarah Rodriguez', time: '2 hours ago' },
-    { type: 'match', text: 'New alumni match: Michael Chen', time: '5 hours ago' },
-    { type: 'application', text: 'Applied to Software Engineer Intern at TechCorp', time: '1 day ago' },
-    { type: 'event', text: 'Registered for Career Fair 2024', time: '2 days ago' }
-  ]
+    {
+      type: "message",
+      text: "New message from Sarah Rodriguez",
+      time: "2 hours ago",
+    },
+    {
+      type: "match",
+      text: "New alumni match: Michael Chen",
+      time: "5 hours ago",
+    },
+    {
+      type: "application",
+      text: "Applied to Software Engineer Intern at TechCorp",
+      time: "1 day ago",
+    },
+    {
+      type: "event",
+      text: "Registered for Career Fair 2024",
+      time: "2 days ago",
+    },
+  ];
 
   const aiRecommendations = [
     {
-      id: '1',
-      name: 'Sarah Rodriguez',
-      position: 'Senior Product Manager at TechCorp',
+      id: "1",
+      name: "Sarah Rodriguez",
+      position: "Senior Product Manager at TechCorp",
       matchScore: 95,
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-      reasons: ['Product Management interest', 'Tech industry focus', '95% skill match']
+      avatar:
+        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+      reasons: [
+        "Product Management interest",
+        "Tech industry focus",
+        "95% skill match",
+      ],
     },
     {
-      id: '2',
-      name: 'David Kim',
-      position: 'Software Engineer at StartupXYZ',
+      id: "2",
+      name: "David Kim",
+      position: "Software Engineer at StartupXYZ",
       matchScore: 87,
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-      reasons: ['JavaScript expertise', 'Startup experience', 'Machine Learning interest']
-    }
-  ]
+      avatar:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      reasons: [
+        "JavaScript expertise",
+        "Startup experience",
+        "Machine Learning interest",
+      ],
+    },
+  ];
 
   return (
     <motion.div
@@ -57,7 +94,7 @@ export const StudentDashboard: React.FC = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, index) => {
-          const Icon = stat.icon
+          const Icon = stat.icon;
           return (
             <motion.div
               key={stat.label}
@@ -69,11 +106,13 @@ export const StudentDashboard: React.FC = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {stat.label}
+                      </p>
                       <p className="text-2xl font-bold">{stat.value}</p>
                     </div>
                     <div className="flex items-center space-x-2">
-                      {stat.trend !== '0' && (
+                      {stat.trend !== "0" && (
                         <span className="text-sm text-green-600 font-medium">
                           {stat.trend}
                         </span>
@@ -84,7 +123,7 @@ export const StudentDashboard: React.FC = () => {
                 </CardContent>
               </Card>
             </motion.div>
-          )
+          );
         })}
       </div>
 
@@ -107,14 +146,23 @@ export const StudentDashboard: React.FC = () => {
               >
                 <Avatar>
                   <AvatarImage src={alumni.avatar} alt={alumni.name} />
-                  <AvatarFallback>{alumni.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  <AvatarFallback>
+                    {alumni.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <h4 className="font-semibold">{alumni.name}</h4>
-                    <Badge variant="secondary">{alumni.matchScore}% match</Badge>
+                    <Badge variant="secondary">
+                      {alumni.matchScore}% match
+                    </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">{alumni.position}</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {alumni.position}
+                  </p>
                   <div className="flex flex-wrap gap-1">
                     {alumni.reasons.map((reason, idx) => (
                       <Badge key={idx} variant="outline" className="text-xs">
@@ -127,7 +175,7 @@ export const StudentDashboard: React.FC = () => {
                   </Button>
                 </div>
               </motion.div>
-            ))}
+            ))}\
           </CardContent>
         </Card>
 
@@ -151,10 +199,12 @@ export const StudentDashboard: React.FC = () => {
                 <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                 <div className="flex-1">
                   <p className="text-sm">{activity.text}</p>
-                  <p className="text-xs text-muted-foreground">{activity.time}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {activity.time}
+                  </p>
                 </div>
               </motion.div>
-            ))}
+            ))}\
           </CardContent>
         </Card>
       </div>
@@ -166,13 +216,13 @@ export const StudentDashboard: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            <Button>Find Alumni</Button>
-            <Button variant="outline">Browse Jobs</Button>
-            <Button variant="outline">Join Events</Button>
-            <Button variant="outline">Ask AI Career Bot</Button>
+            <Button onClick={() => onViewChange("discover")}>Find Alumni</Button>
+            <Button variant="outline" onClick={() => onViewChange("jobboard")}>Browse Jobs</Button>
+            <Button variant="outline" onClick={() => onViewChange("events")}>Join Events</Button>
+            <Button variant="outline" onClick={() => onViewChange("faq")}>Ask AI Career Bot</Button>
           </div>
         </CardContent>
       </Card>
     </motion.div>
-  )
-}
+  );
+};

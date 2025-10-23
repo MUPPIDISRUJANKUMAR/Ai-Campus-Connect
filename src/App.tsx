@@ -15,11 +15,13 @@ import Settings from './components/settings/Settings';
 import MyRequestsPage from './components/myrequests/MyRequestsPage';
 import JobBoardPage from './components/jobboard/JobBoardPage';
 import EventsPage from './components/events/EventsPage';
+import NotificationsPage from './components/notifications/NotificationsPage';
 import { ToastProvider } from './contexts/ToastContext'; // Import ToastProvider
+import { NotificationProvider } from './contexts/NotificationContext';
+import { Notifications } from './components/notifications/Notifications';
 
-const AppContent: React.FC = () => {
+const AppContent: React.FC<{ currentView: string; onViewChange: (view: string) => void; }> = ({ currentView, onViewChange }) => {
   const { user, isAuthenticated, firebaseUser } = useAuth()
-  const [currentView, setCurrentView] = useState('dashboard')
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
 
@@ -41,7 +43,7 @@ const AppContent: React.FC = () => {
   const renderContent = () => {
     switch (currentView) {
       case 'dashboard':
-        return user?.role === 'admin' ? <AdminDashboard /> : <StudentDashboard />
+        return user?.role === 'admin' ? <AdminDashboard /> : <StudentDashboard onViewChange={onViewChange} />
       case 'discover':
         return <AlumniDiscovery />
       case 'chat':
@@ -58,25 +60,27 @@ const AppContent: React.FC = () => {
         return <JobBoardPage />
       case 'events':
         return <EventsPage />
+      case 'notifications':
+        return <NotificationsPage />
       case 'verification':
       case 'analytics':
       case 'moderation':
         return <AdminDashboard />
       default:
-        return <StudentDashboard />
+        return <StudentDashboard onViewChange={onViewChange} />
     }
   }
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar 
-        onViewChange={setCurrentView} 
+        onViewChange={onViewChange} 
         onToggleMobileSidebar={() => setMobileSidebarOpen(!isMobileSidebarOpen)} 
       />
       <div className="flex">
         <Sidebar 
           currentView={currentView} 
-          onViewChange={setCurrentView} 
+          onViewChange={onViewChange} 
           isMobileSidebarOpen={isMobileSidebarOpen}
           onCloseMobileSidebar={() => setMobileSidebarOpen(false)}
         />
@@ -97,11 +101,16 @@ const AppContent: React.FC = () => {
 }
 
 function App() {
+  const [currentView, setCurrentView] = useState('dashboard');
+
   return (
     <ToastProvider> {/* Wrap with ToastProvider */}
       <AuthProvider>
         <ThemeProvider>
-          <AppContent />
+          <NotificationProvider>
+            <AppContent currentView={currentView} onViewChange={setCurrentView} />
+            <Notifications onViewChange={setCurrentView} />
+          </NotificationProvider>
         </ThemeProvider>
       </AuthProvider>
     </ToastProvider>
